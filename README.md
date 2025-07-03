@@ -16,4 +16,4 @@ engineered features:
 - last_online_missing(int)
 - days_since_last_online(int)
 
-Check .md file for exact model stats, in general it works pretty well! prototyping the pipelines general workflow was really handy, the added functions also are very convinient and worth stealing for future projects.
+Check .md file for exact model stats, in general it works pretty well! prototyping the pipelines general workflow was really handy, the added functions also are very convinient and worth stealing for future projects. Probably couldve made the stats EVEN better but tuning seemed a little redundant with the baseline being so robustly high.
