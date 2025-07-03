@@ -34,12 +34,12 @@
 **Results:**  
 === Classification Report ===
  
-|                     | precision | recall | f1-score | support | 
-|                     | ---------- | ------ | -------- | ------ |
-|  Break in Learning  |     0.44   |  0.46  |   0.45   |   81   |
-|Completed: Achieved  |     0.99   |  0.95  |   0.97   |  110   | 
-|         Continuing  |     0.95   |  0.93  |   0.94   |  629   |       
-|          Withdrawn  |     0.88   |  0.91  |   0.90   |  393   |         
+                          | precision | recall | f1-score | support | 
+                          | ---------- | ------ | -------- | ------ |
+    |  Break in Learning  |     0.44   |  0.46  |   0.45   |   81   |
+    |Completed: Achieved  |     0.99   |  0.95  |   0.97   |  110   | 
+    |         Continuing  |     0.95   |  0.93  |   0.94   |  629   |       
+    |          Withdrawn  |     0.88   |  0.91  |   0.90   |  393   |         
 
 
            accuracy                           0.90      1213
@@ -48,10 +48,11 @@
 
 
 === Confusion Matrix ===
-[[ 37   1  19  24]
- [  2 105   2   1]
- [ 21   0 585  23]
- [ 24   0  10 359]]
+
+     [ 37   1  19  24]
+     [  2 105   2   1]
+     [ 21   0 585  23]
+     [ 24   0  10 359]
 
 === Summary Scores ===
 Accuracy:      0.8953
