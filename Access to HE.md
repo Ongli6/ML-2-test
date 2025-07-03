@@ -1,10 +1,7 @@
 # Hyperparameter Log
 
 **PRE BASELINE NOTES**
-- Consider dropping RAG rating from baseline, not really sure how good the human input is
-- 18 Features so far:
-    numeric_features = ['CreditRatio', 'Past Units Incomplete', 'attendance_converted','Target_Missing', 'Current_Missing' 'attendance_missing', 'last_online_missing', 'days_since_last_online']
-    string_features = ['Current_missing', 'Student Group Code', 'Passed Last Unit', 'Manager', 'Teachers', 'Course Code', 'Course Title', 'RAG Rating', 'Location', 'Faculty' ]
+- Consider dropping RAG rating from baseline, not really sure how good the human input is.
 
 ## Experiment 001 - Baseline
 **Date:** 2025-07-03
