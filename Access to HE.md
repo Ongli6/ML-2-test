@@ -42,9 +42,9 @@
     |          Withdrawn  |     0.88   |  0.91  |   0.90   |  393   |         
 
 
-           accuracy                           0.90      1213
-          macro avg       0.82      0.81      0.81      1213
-       weighted avg       0.90      0.90      0.90      1213
+                 accuracy                           0.90      1213
+                macro avg       0.82      0.81      0.81      1213
+             weighted avg       0.90      0.90      0.90      1213
 
 
 === Confusion Matrix ===
@@ -97,23 +97,25 @@ Baseline shows EXTREMELY high numbers. Feature importance graph (001_ATHGP_featu
 
 **Results:**  
 === Classification Report ===
-                     precision    recall  f1-score   support
 
-  Break in Learning       0.43      0.49      0.46        81
-Completed: Achieved       0.92      0.96      0.94       110
-         Continuing       0.94      0.92      0.93       629
-          Withdrawn       0.89      0.88      0.89       393
+                           precision    recall  f1-score   support
 
-           accuracy                           0.88      1213
-          macro avg       0.80      0.81      0.80      1213
-       weighted avg       0.89      0.88      0.88      1213
+      Break in Learning       0.43      0.49      0.46        81
+    Completed: Achieved       0.92      0.96      0.94       110
+             Continuing       0.94      0.92      0.93       629
+              Withdrawn       0.89      0.88      0.89       393
+
+               accuracy                           0.88      1213
+              macro avg       0.80      0.81      0.80      1213
+           weighted avg       0.89      0.88      0.88      1213
 
 
 === Confusion Matrix ===
-[[ 40   2  18  21]
- [  2 106   1   1]
- [ 23   7 578  21]
- [ 27   0  19 347]]
+
+    [ 40   2  18  21]
+    [  2 106   1   1]
+    [ 23   7 578  21]
+    [ 27   0  19 347]]
 
 === Summary Scores ===
 Accuracy:      0.8829
