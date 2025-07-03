@@ -33,12 +33,14 @@
 
 **Results:**  
 === Classification Report ===
-                     precision    recall  f1-score   support
+ 
+|                     | precision | recall | f1-score | support | 
+|                     | ---------- | ------ | -------- | ------ |
+|  Break in Learning  |     0.44   |  0.46  |   0.45   |   81   |
+|Completed: Achieved  |     0.99   |  0.95  |   0.97   |  110   | 
+|         Continuing  |     0.95   |  0.93  |   0.94   |  629   |       
+|          Withdrawn  |     0.88   |  0.91  |   0.90   |  393   |         
 
-  Break in Learning       0.44      0.46      0.45        81
-Completed: Achieved       0.99      0.95      0.97       110
-         Continuing       0.95      0.93      0.94       629
-          Withdrawn       0.88      0.91      0.90       393
 
            accuracy                           0.90      1213
           macro avg       0.82      0.81      0.81      1213
