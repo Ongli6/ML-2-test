@@ -1,0 +1,182 @@
+
+import pandas as pd
+from sklearn.utils import shuffle
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import f1_score, roc_auc_score
+from sklearn.model_selection import StratifiedKFold, cross_val_score
+from sklearn.model_selection import cross_val_predict, StratifiedKFold
+from sklearn.metrics import (
+    classification_report, confusion_matrix, log_loss,
+    roc_auc_score, precision_score, recall_score, f1_score, accuracy_score)
+import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+from sklearn.ensemble import RandomForestClassifier
+
+
+#============================HELPER DICTIONARY============================
+
+def add_all_missing_flags(df):
+    for col in df.columns:
+        if col.endswith('_missing'):
+            continue
+        df[f'{col}_missing'] = df[col].isna().astype(int)
+    return df
+7
+#Vectorisation for strings
+def frequency_encoding(df, cols):
+    for col in cols:
+        freq = df[col].value_counts(normalize=True)
+        df[col + '_freq_enc'] = df[col].map(freq)
+        df[col + '_freq_enc'] = df[col + '_freq_enc'].fillna(0)  # or use mean(freq.values)
+    return df
+#============================LOAD AND CLEAN============================
+
+# Load Data and clean
+df = pd.read_excel(r"C:\Users\oyoung\Python projects\MLproject\Files\Raw data\Achievement Access to HE.xlsx")
+
+cols_to_drop = ['Student ID', 'Forename', 'Surname', 'Allocated Credits', 'Instance', 'Learning Aim', 'Learning Aim Title', 'Linked Exam', 'Expected End Date', 'Actual End Date', 'Overall Status', 'Programme Area', 'Sector', 'Register Numbers']
+missing_cols = [col for col in cols_to_drop if col not in df.columns]
+df = df.reset_index(drop=True)
+
+if missing_cols:
+    response = input(f"Warning: Columns {missing_cols} not found. Continue anyway? (y/n): ").strip().lower()
+    if response != 'y':
+        print("Aborting.")
+        exit()  # or raise an exception, or handle as you prefer
+
+df.drop(columns=[col for col in cols_to_drop if col in df.columns], inplace=True)
+
+#Save the target column
+df['Status'] = df['Status'].fillna(method='ffill')
+target = df['Status']
+df.drop(columns=['Status'], inplace=True)
+df = df.reset_index(drop=True)
+
+
+df = add_all_missing_flags(df)
+
+print (df.head())
+
+#============================FEATURE PREP============================
+
+
+
+#  -- CREDITS --
+# Compute CreditRatio safely - removed since 002
+#df['CreditRatio'] = df['Current Credits'] / df['Target Credits']
+
+
+# -- ATTENDANCE -- 
+# Attendance convertion strip '%' and convert to float (0–1), coercing errors to NaN
+df['attendance_converted'] = df['Attendance YTD'].astype(str).str.rstrip('%').replace('', pd.NA)
+df['attendance_converted'] = pd.to_numeric(df['attendance_converted'], errors='coerce') / 100
+
+
+# -- ALO -- 
+# Convert to datetime
+df['Last Time Online'] = pd.to_datetime(df['Last ALO Click'])
+
+# Calculate days since last online relative to today
+df['Last Time Online'] = pd.to_datetime(df['Last ALO Click'], errors='coerce')
+df['days_since_last_online'] = (pd.Timestamp.today() - df['Last Time Online']).dt.days
+#============================DATA PREP============================
+
+# split data into numeric and text     
+numeric_features = ['Past Units Incomplete', 'attendance_converted', 'days_since_last_online']
+missing_flags = [col for col in df.columns if col.endswith('_missing')]
+numeric_features += missing_flags
+
+string_features = ['Student Group Code', 'Passed Last Unit', 'Manager', 'Teachers', 'Course Code', 'Course Title', 'RAG Rating', 'Location', 'Faculty' ]
+
+# -- IMPUTER (for numeric)
+# Step 1: Convert empty strings to np.nan
+df[numeric_features] = df[numeric_features].replace('', np.nan)
+
+# Numeric: fill missing with mean
+num_imputer = SimpleImputer(strategy='mean')
+df[numeric_features] = num_imputer.fit_transform(df[numeric_features])
+
+# Strings: fill missing with explicit label 'Missing'
+str_imputer = SimpleImputer(strategy='constant', fill_value='Missing')
+df[string_features] = str_imputer.fit_transform(df[string_features])
+
+#Strings: frequency encode
+df = frequency_encoding(df, string_features)
+string_features_encoded = [col + '_freq_enc' for col in string_features]
+
+#Scaler for numeric
+scaler = StandardScaler()
+df[numeric_features] = scaler.fit_transform(df[numeric_features])
+
+#sanity check
+#print(df[numeric_features + string_features_encoded].isnull().sum().sort_values(ascending=False))
+
+#============================VALIDATION============================
+
+#define x and Y
+X = df[numeric_features + string_features_encoded]
+y = target
+
+
+#Define model
+model = RandomForestClassifier(
+    n_estimators=500,
+    max_depth=30,
+    min_samples_split=5,
+    min_samples_leaf=2,
+    max_features='sqrt',
+    class_weight='balanced',
+    verbose=1,
+    random_state=42,
+    n_jobs=-1
+)
+
+#StratifiedKfold as alot more achieved then withdrawn
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+scores = cross_val_score(model, X, y, cv=skf, scoring='f1_macro')
+
+# Cross-validated predictions
+y_pred = cross_val_predict(model, X, y, cv=skf, method='predict', n_jobs=-1)
+y_proba = cross_val_predict(model, X, y, cv=skf, method='predict_proba', n_jobs=-1)
+
+#Sanity check
+y_shuffled = shuffle(y, random_state=42)
+shuffled_preds = cross_val_predict(model, X, y_shuffled, cv=skf, method='predict')
+print(f"Shuffled accuracy: {accuracy_score(y_shuffled, shuffled_preds):.4f}")
+
+
+importances = model.fit(X, y).feature_importances_
+feature_names = X.columns
+
+# Create a sorted list of (feature, importance)
+feat_imp = sorted(zip(feature_names, importances), key=lambda x: x[1], reverse=True)
+
+# Split names and scores for plotting
+names, scores = zip(*feat_imp)
+
+plt.figure(figsize=(10, 6))
+plt.barh(names[:20][::-1], scores[:20][::-1])  # Top 20 features, reversed for better visual
+plt.xlabel('Feature Importance')
+plt.title('Top 20 Feature Importances')
+plt.show()
+
+# Evaluate
+print("=== Classification Report ===")
+print(classification_report(y, y_pred))
+
+print("\n=== Confusion Matrix ===")
+print(confusion_matrix(y, y_pred))
+
+print("\n=== Summary Scores ===")
+print(f"Accuracy:      {accuracy_score(y, y_pred):.4f}")
+print(f"F1 Score:      {f1_score(y, y_pred, average='macro'):.4f}")
+print(f"Precision:     {precision_score(y, y_pred, average='macro'):.4f}")
+print(f"Recall:        {recall_score(y, y_pred, average='macro'):.4f}")
+print(f"Log Loss:      {log_loss(y, y_proba):.4f}")
+print(f"ROC AUC (OVR): {roc_auc_score(y, y_proba, multi_class='ovr'):.4f}")
